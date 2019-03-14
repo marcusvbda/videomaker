@@ -1,4 +1,3 @@
-// ;
 
 const robot = {
     algorithmia : require('algorithmia'),

@@ -13,6 +13,7 @@ const app = {
         app.content.prefix = app.askAndReturnPrefix();
         await robots.text.run(app.content);
         console.log("......... Finished");
+        // console.log(app.content);
     },
     askAndReturnSearchTerm : ()=>{
         console.log("......... Asking and Return Search Term");    
