@@ -1,39 +1,22 @@
-const readline = require('readline-sync')
-
 class App {
     
     constructor() {
         this.robots = {
-            text : require('./robots/text.js')
+            text      : require('./robots/text.js'),
+            userInput : require('./robots/user-input.js')
         };
-        this.content    = {}
-        this.searchTerm = null
-        this.prefix     = []
+        this.content = {}
+        this.search  = {}
     }
 
     async start() {
         console.log("......... Starting")
-        this.searchTerm = this.askAndReturnSearchTerm()
-        this.prefix     = this.askAndReturnPrefix()
-        this.content  = await this.robots.text.run(this.searchTerm)
+        this.search = this.robots.userInput.run()
+        this.content    = await this.robots.text.run(this.search)
         console.log("......... Finished")
-        console.log(this.content);
+        // console.log(this.content)
     }
-
-    askAndReturnSearchTerm() {
-        console.log("......... Asking and Return Search Term")  
-        // return readline.question('Type a Wikipedia search term: ')
-        return "Michael Jackson"
-    }
-
-    askAndReturnPrefix() {
-        console.log("......... Asking and Return Prefix")    
-        let prefixes = ['Who is', 'What is', 'The history of']
-        // let selectedPrefixIndex = readline.keyInSelect(prefixes, 'Choose one option: ')
-        let selectedPrefixIndex = 0
-        let selectedPrefixText  = prefixes[selectedPrefixIndex]
-        return selectedPrefixText
-    }
+    
 }
 
 let app = new App()

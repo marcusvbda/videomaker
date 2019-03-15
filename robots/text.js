@@ -9,12 +9,12 @@ class text {
             sourceContentSanitized : null,
             sentences              : [],
         };
-        this.searchTerm = null;
+        this.search = null;
     }
 
-    async run(searchTerm) {
+    async run(search) {
         console.log("......... Running Text Robot")
-        this.searchTerm = searchTerm;
+        this.search = search;
         await this.fetchContentFromWikipedia()
         this.sanitizeContent()
         this.breakContentIntoSentences()
@@ -25,7 +25,10 @@ class text {
         console.log("......... Fetching Content from wikipedia")
         let algorithmiaAuthenticated       = this.algorithmia(this.algorithmiaApiKey);
         let wikipediaAlgorithm             = algorithmiaAuthenticated.algo('web/WikipediaParser/0.1.2')
-        let wikipediaResponse              = await wikipediaAlgorithm.pipe(this.searchTerm)
+        let wikipediaResponse = await wikipediaAlgorithm.pipe({
+            "lang" : this.search.lang,
+            "articleName": this.search.searchTerm
+        })
         let wikipediaContent               = wikipediaResponse.get()
         this.content.sourceContentOriginal = wikipediaContent.content
     }
