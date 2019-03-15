@@ -3,7 +3,6 @@
 ## Algorithmia
 
 File: `algorithmia.json`
-
 ```
 {
   "apiKey": "xxxxxxxxxxxxxxxxxxxx"

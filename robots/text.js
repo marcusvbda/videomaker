@@ -1,55 +1,72 @@
+class text {
+    
+    constructor() {
+        this.algorithmia       = require('algorithmia')
+        this.algorithmiaApiKey = require('../credentials/algorithmia.json').apiKey
+        this.sentenceBoundaryDetection = require('sbd')
+        this.content = {
+            sourceContentOriginal  : null,
+            sourceContentSanitized : null,
+            sentences              : [],
+        };
+        this.searchTerm = null;
+    }
 
-const robot = {
-    algorithmia : require('algorithmia'),
-    algorithmiaApiKey : require('../credentials/algorithmia.json').apiKey,
-    sentenceBoundaryDetection : require('sbd'),
+    async run(searchTerm) {
+        console.log("......... Running Text Robot")
+        this.searchTerm = searchTerm;
+        await this.fetchContentFromWikipedia()
+        this.sanitizeContent()
+        this.breakContentIntoSentences()
+        return this.content;
+    }
 
-    run : async(content) => {
-        console.log("......... Running Text Robot");
-        await robot.fetchContentFromWikipedia(content);
-        robot.sanitizeContent(content)
-        robot.breakContentIntoSentences(content);
-    },
-    fetchContentFromWikipedia : async (content) => {
-        console.log("......... Fetching Content from wikipedia");
-        const algorithmiaAuthenticated = robot.algorithmia(robot.algorithmiaApiKey);
-        const wikipediaAlgorithm = algorithmiaAuthenticated.algo('web/WikipediaParser/0.1.2');
-        const wikipediaResponse = await wikipediaAlgorithm.pipe(content.searchTerm);
-        const wikipediaContent = wikipediaResponse.get();
-        content.sourceContentOriginal = wikipediaContent.content;
-    },
-    sanitizeContent : (content) => {
-        console.log("......... Sanitizing Content");
-        const withoutBlankLinesAndMarkdown = removeBlankLinesAndMarkdown(content.sourceContentOriginal);
-        const withoutDatesInParentheses = robot.removeDatesInParentheses(withoutBlankLinesAndMarkdown);
-        content.sourceContentSanitized = withoutDatesInParentheses;
+    async fetchContentFromWikipedia() {
+        console.log("......... Fetching Content from wikipedia")
+        let algorithmiaAuthenticated       = this.algorithmia(this.algorithmiaApiKey);
+        let wikipediaAlgorithm             = algorithmiaAuthenticated.algo('web/WikipediaParser/0.1.2')
+        let wikipediaResponse              = await wikipediaAlgorithm.pipe(this.searchTerm)
+        let wikipediaContent               = wikipediaResponse.get()
+        this.content.sourceContentOriginal = wikipediaContent.content
+    }
+
+    sanitizeContent() {
+        console.log("......... Sanitizing Content")
+        let withoutBlankLinesAndMarkdown     = removeBlankLinesAndMarkdown(this.content.sourceContentOriginal)
+        let withoutDatesInParentheses        = removeDatesInParentheses(withoutBlankLinesAndMarkdown)
+        this.content.sourceContentSanitized  = withoutDatesInParentheses;
+
         function removeBlankLinesAndMarkdown(text) {
-            console.log("......... Removing blank lines and Markdown");            
-            const allLines = text.split('\n')
-            const withoutBlankLinesAndMarkdown = allLines.filter((line) => {
+            console.log("......... Removing blank lines and Markdown")          
+            let allLines = text.split('\n')
+            let withoutBlankLinesAndMarkdown = allLines.filter((line) => {
                 if (line.trim().length === 0 || line.trim().startsWith('=')) {
-                    return false;
+                    return false
                 }
-                return true;
-            });
-            return withoutBlankLinesAndMarkdown.join(' ');
+                return true
+            })
+            return withoutBlankLinesAndMarkdown.join(' ')
         }
-    },
-    removeDatesInParentheses : (text) => {
-        return text.replace(/\((?:\([^()]*\)|[^()])*\)/gm, '').replace(/  /g,' ');
-    },
-    breakContentIntoSentences : (content) => {
-        console.log("......... Breaking Content Into Sentences");            
-        content.sentences = [];
-        const sentences = robot.sentenceBoundaryDetection.sentences(content.sourceContentSanitized);
+
+        function removeDatesInParentheses(text) {
+            return text.replace(/\((?:\([^()]*\)|[^()])*\)/gm, '').replace(/  /g,' ')
+        }
+    }
+
+    breakContentIntoSentences() {
+        console.log("......... Breaking Content Into Sentences")          
+        let sentences = this.sentenceBoundaryDetection.sentences(this.content.sourceContentSanitized)
         sentences.forEach((sentence) => {
-          content.sentences.push({
+          this.content.sentences.push({
             text: sentence,
             keywords: [],
             images: []
-          });
-        });
+          })
+        })
     }
+
 }
 
-module.exports = robot;
+
+let robot = new text()
+module.exports = robot
