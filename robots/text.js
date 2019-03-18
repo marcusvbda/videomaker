@@ -1,13 +1,19 @@
+const NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-language-understanding/v1.js')
+
 class text {
     
     constructor() {
         this.algorithmia       = require('algorithmia')
         this.algorithmiaApiKey = require('../credentials/algorithmia.json').apiKey
+        this.robots = {
+            watsonNlu  : require('./watson-nlu'),
+        };
         this.sentenceBoundaryDetection = require('sbd')
         this.content = {
             sourceContentOriginal  : null,
             sourceContentSanitized : null,
             sentences              : [],
+            maximumSentences       : 7
         };
         this.search = null;
     }
@@ -18,6 +24,8 @@ class text {
         await this.fetchContentFromWikipedia()
         this.sanitizeContent()
         this.breakContentIntoSentences()
+        this.limitMaximumSentences()
+        this.content = await this.robots.watsonNlu.run(this.content)
         return this.content;
     }
 
@@ -67,6 +75,11 @@ class text {
           })
         })
     }
+
+    limitMaximumSentences() {
+        console.log("......... Limiting Maximum Sentences")          
+        this.content.sentences = this.content.sentences.slice(0, this.content.maximumSentences)
+    }    
 
 }
 

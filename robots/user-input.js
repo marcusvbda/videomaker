@@ -32,7 +32,7 @@ class userInput {
         console.log("......... Asking language")    
         let language = ['pt','en']
         // let selectedLangIndex = readline.keyInSelect(language,'Choice Language: ')
-        let selectedLangIndex = 0
+        let selectedLangIndex = 1
         let selectedLangText = language[selectedLangIndex]
         return selectedLangText
     }
